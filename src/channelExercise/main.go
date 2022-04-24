@@ -134,8 +134,11 @@ func goroutineRes(numChan chan int,resChan chan int,flagChan chan bool) {
 
 func getResChan(chan1,chan2 chan int,chan3 chan bool,n int)  {
 	for {
-		num := <- chan1
+		num,ok := <- chan1
 		if num > 100 {
+			break
+		}
+		if !ok {
 			break
 		}
 		res := 0
@@ -172,13 +175,10 @@ func main()  {
 		go getResChan(chan1,chan2,chan3,100)
 	}
 	go func ()  {
-		for {
-			_,ok := <- chan3
-			if !ok {
-				close(chan3)
-				go readerRes(chan2)
-				break
-			}
+		for i := 0; i < 8; i++ {
+			<-chan3
 		}
+		close(chan2)
 	}()
+	readerRes(chan2)
 }
