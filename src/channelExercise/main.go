@@ -141,6 +141,9 @@ func getResChan(chan1,chan2 chan int,chan3 chan bool,n int)  {
 		if num > n {
 			break
 		}
+		if !ok {
+			break
+		}
 		res := 0
 		for i := 0; i <= num; i++ {
 			res += i
@@ -174,9 +177,15 @@ func main()  {
 	for i := 0; i < 8; i++ {
 		go getResChan(chan1,chan2,chan3,8000)
 	}
+<<<<<<< HEAD
 	go func() {
 		for i := 0; i < 8; i++ {
 			<- chan3
+=======
+	go func ()  {
+		for i := 0; i < 8; i++ {
+			<-chan3
+>>>>>>> ce546a7b27a65ef817cecd980ed6cea54334c313
 		}
 		close(chan2)
 	}()
