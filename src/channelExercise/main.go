@@ -134,8 +134,11 @@ func goroutineRes(numChan chan int,resChan chan int,flagChan chan bool) {
 
 func getResChan(chan1,chan2 chan int,chan3 chan bool,n int)  {
 	for {
-		num := <- chan1
-		if num > 100 {
+		num,ok := <- chan1
+		if !ok {
+			break
+		}
+		if num > n {
 			break
 		}
 		res := 0
@@ -158,27 +161,52 @@ func readerRes(chan2 chan int)  {
 
 func main()  {
 	// 创建三个通道
-	chan1 := make(chan int,100)
-	chan2 := make(chan int,100)
+	chan1 := make(chan int,8000)
+	chan2 := make(chan int,8000) 
 	chan3 := make(chan bool,8)
 	// 创建一个协程
 	go func() {
-		for i := 0; i <= 100; i++ {
+		for i := 0; i <= 8000; i++ {
 			chan1<- i
 		}
 		close(chan1)
 	}()
 	for i := 0; i < 8; i++ {
-		go getResChan(chan1,chan2,chan3,100)
+		go getResChan(chan1,chan2,chan3,8000)
 	}
-	go func ()  {
-		for {
-			_,ok := <- chan3
-			if !ok {
-				close(chan3)
-				go readerRes(chan2)
-				break
-			}
+	go func() {
+		for i := 0; i < 8; i++ {
+			<- chan3
 		}
+		close(chan2)
 	}()
+	readerRes(chan2)
 }
+
+
+// func write(chan1 chan int) {
+// 	for i := 0; i < 100; i++ {
+// 		chan1 <- i
+// 	}
+// 	close(chan1)
+// }
+// func read(chan1 chan int, chan2 chan int, chan3 chan bool) {
+// 	for { 
+// 		var flag bool
+// 		num, ok := <- chan1
+// 		if !ok {
+// 			break
+// 		}
+// 		for i := 2; i < num; i++ {
+// 			if num % i == 0 {
+// 				flag = true
+// 				break
+// 			}
+// 		}
+// 		if !flag {
+// 			chan2 <- num
+// 		}
+// 	}
+// 	chan3 <- true
+// }
+
